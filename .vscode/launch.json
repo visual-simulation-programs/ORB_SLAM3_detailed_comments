@@ -1,0 +1,38 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "(gdb) Launch",
+			"type": "cppdbg",
+			"request": "launch",
+			// "program": "${workspaceFolder}/Examples/Monocular-Inertial/mono_inertial_euroc",
+			// "args": ["/home/zgc/Documents/git_repos/ORB_SLAM3_detailed_comments/Vocabulary/ORBvoc.txt",
+			// 	"/media/zgc/CHZ_Rail/zgc/20210525_DJIFLY_IMX219_SBG/mav0/dji_imx219_sbg.yaml",
+			// 	"/media/zgc/CHZ_Rail/zgc/20210525_DJIFLY_IMX219_SBG",
+			// 	"/media/zgc/CHZ_Rail/zgc/20210525_DJIFLY_IMX219_SBG/mav0/dji.imx219.partial.txt",
+			// 	"dataset-dji_monoi"
+			"program": "${workspaceFolder}/Examples/Monocular/mono_euroc",
+			"args": ["/home/zgc/Documents/git_repos/ORB_SLAM3_detailed_comments/Vocabulary/ORBvoc.txt",
+				"/media/zgc/CHZ_Rail/zgc/Zurich Urban Micro Aerial Vehicle Dataset/AGZ_subset/agz_subset.yaml",
+				"/media/zgc/CHZ_Rail/zgc/Zurich Urban Micro Aerial Vehicle Dataset/AGZ_subset",
+				"/media/zgc/CHZ_Rail/zgc/Zurich Urban Micro Aerial Vehicle Dataset/AGZ_subset/mav.csv",
+				"dataset-dji_mono"
+],
+			"stopAtEntry": false,
+			"cwd": "${fileDirname}",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			]
+		}
+	]
+}
