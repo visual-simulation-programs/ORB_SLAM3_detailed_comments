@@ -293,7 +293,7 @@ protected:
     //Last Frame, KeyFrame and Relocalisation Info
     KeyFrame* mpLastKeyFrame;
     unsigned int mnLastKeyFrameId;
-    unsigned int mnLastRelocFrameId;
+    unsigned int mnLastRelocFrameId; ///< 上一次重定位的那一帧
     double mTimeStampLost;
     double time_recently_lost;
 

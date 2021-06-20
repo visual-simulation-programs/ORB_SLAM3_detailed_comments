@@ -59,9 +59,30 @@ public:
 
     void static MergeBundleAdjustmentVisual(KeyFrame* pCurrentKF, vector<KeyFrame*> vpWeldingKFs, vector<KeyFrame*> vpFixedKFs, bool *pbStopFlag);
 
+    /**
+     * @brief 根据获得的匹配点进行位姿优化，在恒速跟踪模型中使用。
+     * 
+     * @param[in] pFrame 
+     * @return int 
+     */
     int static PoseOptimization(Frame* pFrame);
 
+    /**
+     * @brief 位姿优化，imu模式下地图更新时用。
+     * 
+     * @param[in] pFrame 
+     * @param[in] bRecInit 
+     * @return int 
+     */
     int static PoseInertialOptimizationLastKeyFrame(Frame* pFrame, bool bRecInit = false);
+
+    /**
+     * @brief 位姿优化，imu地图未更新时用。
+     * 
+     * @param[in] pFrame 
+     * @param[in] bRecInit 
+     * @return int 
+     */
     int static PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit = false);
 
     // if bFixScale is true, 6DoF optimization (stereo,rgbd), 7DoF otherwise (mono)

@@ -1450,7 +1450,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
         return;
 
     float minTime;
-    int nMinKF;
+    int nMinKF; ///< 初始化所需的最少关键帧数量
     if (mbMonocular)
     {
         minTime = 2.0;
@@ -1462,7 +1462,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
         nMinKF = 10;
     }
 
-
+    // 关键帧不够，退出IMU初始化。
     if(mpAtlas->KeyFramesInMap()<nMinKF)
         return;
 

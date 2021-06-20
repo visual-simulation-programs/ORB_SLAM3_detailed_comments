@@ -918,26 +918,26 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
     {
         if(mbRGB)
         {
-            cvtColor(mImGray,mImGray,CV_RGB2GRAY);
-            cvtColor(imGrayRight,imGrayRight,CV_RGB2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_RGB2GRAY);
+            cvtColor(imGrayRight,imGrayRight,cv::COLOR_RGB2GRAY);
         }
         else
         {
-            cvtColor(mImGray,mImGray,CV_BGR2GRAY);
-            cvtColor(imGrayRight,imGrayRight,CV_BGR2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_BGR2GRAY);
+            cvtColor(imGrayRight,imGrayRight,cv::COLOR_BGR2GRAY);
         }
     }
     else if(mImGray.channels()==4)
     {
         if(mbRGB)
         {
-            cvtColor(mImGray,mImGray,CV_RGBA2GRAY);
-            cvtColor(imGrayRight,imGrayRight,CV_RGBA2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_RGBA2GRAY);
+            cvtColor(imGrayRight,imGrayRight,cv::COLOR_RGBA2GRAY);
         }
         else
         {
-            cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
-            cvtColor(imGrayRight,imGrayRight,CV_BGRA2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_BGRA2GRAY);
+            cvtColor(imGrayRight,imGrayRight,cv::COLOR_BGRA2GRAY);
         }
     }
 
@@ -988,16 +988,16 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
     if(mImGray.channels()==3)
     {
         if(mbRGB)
-            cvtColor(mImGray,mImGray,CV_RGB2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_RGB2GRAY);
         else
-            cvtColor(mImGray,mImGray,CV_BGR2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_BGR2GRAY);
     }
     else if(mImGray.channels()==4)
     {
         if(mbRGB)
-            cvtColor(mImGray,mImGray,CV_RGBA2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_RGBA2GRAY);
         else
-            cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_BGRA2GRAY);
     }
 
     if((fabs(mDepthMapFactor-1.0f)>1e-5) || imDepth.type()!=CV_32F)
@@ -1051,16 +1051,16 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp,
     if(mImGray.channels()==3)
     {
         if(mbRGB)
-            cvtColor(mImGray,mImGray,CV_RGB2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_RGB2GRAY);
         else
-            cvtColor(mImGray,mImGray,CV_BGR2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_BGR2GRAY);
     }
     else if(mImGray.channels()==4)
     {
         if(mbRGB)
-            cvtColor(mImGray,mImGray,CV_RGBA2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_RGBA2GRAY);
         else
-            cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
+            cvtColor(mImGray,mImGray,cv::COLOR_BGRA2GRAY);
     }
 
     // Step 2 ：构造Frame
@@ -1081,6 +1081,7 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp,
         else
             mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mpCamera,mDistCoef,mbf,mThDepth,&mLastFrame,*mpImuCalib);
     }
+    mCurrentFrame.mNameFile = filename;
 
     // t0存储未初始化时的第1帧时间戳
     if (mState==NO_IMAGES_YET)
@@ -1127,6 +1128,16 @@ void Tracking::GrabImuData(const IMU::Point &imuMeasurement)
     mlQueueImuData.push_back(imuMeasurement);
 }
 
+/**
+ * @brief IMU 预积分
+ * @remark  如果上一帧不存在，则不进行预积分；如果没有imu数据，也不进行预积分，直接返回
+ * 保存时间戳在两帧之间的imu数据至mvImuFromLastFrame
+ * 构造预积分器pImuPreintegratedFromLastFrame(这个是上一帧到当前帧的预积分)
+ * 对于n个imu数据，要进行n-1次计算得到两帧之间的预积分量。首先利用中值积分，得到每次计算预积分的加速度和角速度。对于头和尾的Imu数据，由于不能严格地和图像时间戳对齐，需要进行适当的补偿。
+ * 开始计算预积分 IntegrateNewMeasurement( )（这个函数在我的另一篇文章中有说明：ORB-SLAM3源码阅读笔记（4）-ImuTypes），这里需要计算上一帧到当前帧的预积分pImuPreintegratedFromLastFrame，和上一关键帧到当前帧的预积分mpImuPreintegratedFromLastKF(在初始化帧和插入关键帧时会新建一个，地图更新时，PredictStateIMU需要相对于上一关键帧计算位姿)
+ * 所有imu数据计算完成之后，记录两个预积分值，并设置当前帧为已预积分状态
+ * 
+ */
 void Tracking::PreintegrateIMU()
 {
     // Step 1.拿到两两帧之间待处理的预积分数据，组成一个集合 
@@ -1179,6 +1190,7 @@ void Tracking::PreintegrateIMU()
                 {
                     // 得到两帧间的imu数据放入mvImuFromLastFrame中,得到后面预积分的处理数据
                     mvImuFromLastFrame.push_back(*m);
+                    mlQueueImuData.pop_front();
                     break;
                 }
             }
@@ -1281,6 +1293,13 @@ void Tracking::PreintegrateIMU()
  * 两个地方用到：
  * 1. 匀速模型计算速度,但并没有给当前帧位姿赋值；
  * 2. 跟踪丢失时不直接判定丢失，通过这个函数预测当前帧位姿看看能不能拽回来，代替纯视觉中的重定位
+ * @remark 有两种情况会用到此函数：
+ * （a）视觉跟丢时用imu预测位姿。
+ * （b）imu模式下，恒速模型跟踪时提供位姿初始值。
+ * 此函数不会直接设置当前帧的位姿，而是记录当前帧的imu到世界坐标系的平移、旋转和速度。在后面TrackLocalMap( )中对位姿优化后才设置当前帧的位姿Tcw。
+ * 地图更新(回环、融合、局部BA、IMU初始化时地图会调整)时，利用上一关键帧和距离上一关键帧的预积分，计算当前帧imu的位姿，因为此时关键帧经过了优化调整，认为更准。
+ * 地图未更新时，利用前一帧和距离前一帧的预积分，计算当前帧imu的位姿，因为此时关键帧没有做优化调整，而前一帧距离更近，认为更准。
+ * 用到的公式为forster预积分论文中的公式(26)，需要做移项。
  * 
  * @return true 
  * @return false 
@@ -2774,11 +2793,18 @@ bool Tracking::TrackWithMotionModel()
         return nmatchesMap>=10;
 }
 
+/**
+ * @brief 这个函数主要是利用局部窗口的关键帧和地图点，为当前帧找到更多的匹配地图点，再进行位姿优化，使得位姿更加准确。
+ * 
+ * @return true 
+ * @return false 
+ */
 bool Tracking::TrackLocalMap()
 {
 
     // We have an estimation of the camera pose and some map points tracked in the frame.
     // We retrieve the local map and try to find matches to points in the local map.
+    mTrackedFr++;
     mTrackedFr++;
 
     UpdateLocalMap();

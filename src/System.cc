@@ -245,7 +245,7 @@ System::System(const string &strVocFile,                //词袋文件所在路�
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
 
     // Fix verbosity
-    Verbose::SetTh(Verbose::VERBOSITY_QUIET);
+    Verbose::SetTh(Verbose::VERBOSITY_DEBUG);
 
 }
 
@@ -382,7 +382,7 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
  * @param[in] filename          调试用的文件名
  * @return cv::Mat              当前帧位姿Tcw
  */
-cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp, const vector<IMU::Point>& vImuMeas, string filename)
+cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp,string filename, const vector<IMU::Point>& vImuMeas)
 {
     // 确保是单目或单目VIO模式
     if(mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR)

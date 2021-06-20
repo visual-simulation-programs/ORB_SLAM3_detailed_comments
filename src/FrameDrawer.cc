@@ -143,10 +143,10 @@ cv::Mat FrameDrawer::DrawFrame(bool bOldFeatures)
                     mnTrackedVO++;
                 }
             }
-            /*else
+            else
             {
                 cv::circle(im,vCurrentKeys[i].pt,2,cv::Scalar(0,0,255),-1);
-            }*/
+            }
         }
         // std::cout << "2.3" << std::endl;
     }
@@ -307,7 +307,7 @@ cv::Mat FrameDrawer::DrawRightFrame()
     } // destroy scoped mutex -> release mutex
 
     if(im.channels()<3) //this should be always true
-        cvtColor(im,im,CV_GRAY2BGR);
+        cvtColor(im,im,cv::COLOR_GRAY2BGR);
 
     //Draw
     if(state==Tracking::NOT_INITIALIZED) //INITIALIZING

@@ -126,7 +126,7 @@ protected:
     System *mpSystem;
 
     bool mbMonocular;
-    bool mbInertial;
+    bool mbInertial; ///< true = 有IMU；false = 没有IMU。
 
     void ResetIfRequested();
     bool mbResetRequested;

@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
         for(int ni=0; ni<nImages[seq]; ni++, proccIm++)
         {
             // Read image from file
-            im = cv::imread(vstrImageFilenames[seq][ni],CV_LOAD_IMAGE_UNCHANGED);
+            im = cv::imread(vstrImageFilenames[seq][ni],cv::IMREAD_UNCHANGED);
 
             double tframe = vTimestampsCam[seq][ni];
 
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 
             // Pass the image to the SLAM system
             // cout << "tframe = " << tframe << endl;
-            SLAM.TrackMonocular(im,tframe,vImuMeas); // TODO change to monocular_inertial
+            SLAM.TrackMonocular(im,tframe, vstrImageFilenames[seq][ni],vImuMeas); // TODO change to monocular_inertial
 
     #ifdef COMPILEDWITHC11
             std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
@@ -239,11 +239,11 @@ void LoadImages(const string &strImagePath, const string &strPathTimes,
         {
             stringstream ss;
             ss << s;
-            vstrImages.push_back(strImagePath + "/" + ss.str() + ".png");
+            vstrImages.push_back(strImagePath + "/" + ss.str() + ".jpg");
             double t;
             ss >> t;
-            vTimeStamps.push_back(t/1e9);
-
+            t = stof(ss.str().substr(0, 11));
+            vTimeStamps.push_back(t);
         }
     }
 }
@@ -277,7 +277,7 @@ void LoadIMU(const string &strImuPath, vector<double> &vTimeStamps, vector<cv::P
             item = s.substr(0, pos);
             data[6] = stod(item);
 
-            vTimeStamps.push_back(data[0]/1e9);
+            vTimeStamps.push_back(data[0]);
             vAcc.push_back(cv::Point3f(data[4],data[5],data[6]));
             vGyro.push_back(cv::Point3f(data[1],data[2],data[3]));
         }

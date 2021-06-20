@@ -101,6 +101,18 @@
 		"xstddef": "cpp",
 		"xstring": "cpp",
 		"xtr1common": "cpp",
-		"xutility": "cpp"
-	}
+		"xutility": "cpp",
+		"array": "cpp",
+		"hash_map": "cpp",
+		"unordered_set": "cpp",
+		"string_view": "cpp",
+		"*.tcc": "cpp"
+	},
+	"python.autoComplete.extraPaths": [
+		"/opt/ros/melodic/lib/python2.7/dist-packages"
+	],
+	"python.analysis.extraPaths": [
+		"/opt/ros/melodic/lib/python2.7/dist-packages"
+	],
+	"python.pythonPath": "/usr/bin/python"
 }

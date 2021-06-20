@@ -510,7 +510,7 @@ void Map::printReprojectionError(list<KeyFrame*> &lpLocalWindowKFs, KeyFrame* mp
         //cout << "KF " << pKFi->mnId << endl;
         cv::Mat img_i = cv::imread(pKFi->mNameFile, CV_LOAD_IMAGE_UNCHANGED);
         //cout << "Image -> " << img_i.cols << ", " << img_i.rows << endl;
-        cv::cvtColor(img_i, img_i, CV_GRAY2BGR);
+        // cv::cvtColor(img_i, img_i, CV_GRAY2BGR);
         //cout << "Change of color in the image " << endl;
 
         vector<MapPoint*> vpMPs = pKFi->GetMapPointMatches();
@@ -530,17 +530,21 @@ void Map::printReprojectionError(list<KeyFrame*> &lpLocalWindowKFs, KeyFrame* mp
             if(bIsInImage){
                 //cout << "Reproj in the image" << endl;
                 cv::circle(img_i, point_img.pt, 1/*point_img.octave*/, cv::Scalar(0, 255, 0));
+                cv::circle(img_i, point_img.pt, 20/*point_img.octave*/, cv::Scalar(0, 255, 0));
                 cv::line(img_i, point_img.pt, reproj_p, cv::Scalar(0, 0, 255));
                 num_points++;
             }
             else
             {
                 //cout << "Reproj out of the image" << endl;
-                cv::circle(img_i, point_img.pt, point_img.octave, cv::Scalar(0, 0, 255));
+                cv::circle(img_i, point_img.pt, point_img.octave, cv::Scalar(255, 0, 0));
             }
 
         }
         //cout << "Image painted" << endl;
+        string cmd = "mkdir -p " + path_imgs;
+        int ret = system(cmd.c_str());
+
         string filename_img = path_imgs +  "KF" + to_string(mpCurrentKF->mnId) + "_" + to_string(pKFi->mnId) +  name + "points" + to_string(num_points) + ".png";
         cv::imwrite(filename_img, img_i);
     }

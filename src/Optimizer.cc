@@ -2022,22 +2022,22 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
     // Set MapPoint vertices
     const int nExpectedSize = (lLocalKeyFrames.size()+lFixedCameras.size())*lLocalMapPoints.size();
 
-    vector<ORB_SLAM3::EdgeSE3ProjectXYZ*> vpEdgesMono;
+    vector<ORB_SLAM3::EdgeSE3ProjectXYZ*> vpEdgesMono; ///< 单目误差值
     vpEdgesMono.reserve(nExpectedSize);
 
-    vector<ORB_SLAM3::EdgeSE3ProjectXYZToBody*> vpEdgesBody;
+    vector<ORB_SLAM3::EdgeSE3ProjectXYZToBody*> vpEdgesBody; ///< IMU误差值？
     vpEdgesBody.reserve(nExpectedSize);
 
-    vector<KeyFrame*> vpEdgeKFMono;
+    vector<KeyFrame*> vpEdgeKFMono; ///< 单目关键帧
     vpEdgeKFMono.reserve(nExpectedSize);
 
-    vector<KeyFrame*> vpEdgeKFBody;
+    vector<KeyFrame*> vpEdgeKFBody; ///< IMU关键帧？
     vpEdgeKFBody.reserve(nExpectedSize);
 
-    vector<MapPoint*> vpMapPointEdgeMono;
+    vector<MapPoint*> vpMapPointEdgeMono; ///< 单目地图点
     vpMapPointEdgeMono.reserve(nExpectedSize);
 
-    vector<MapPoint*> vpMapPointEdgeBody;
+    vector<MapPoint*> vpMapPointEdgeBody; ///< IMU地图点？
     vpMapPointEdgeBody.reserve(nExpectedSize);
 
     vector<g2o::EdgeStereoSE3ProjectXYZ*> vpEdgesStereo;
@@ -2316,11 +2316,12 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
 
     //Verbose::PrintMess("LM-LBA: outlier observations: " + to_string(vToErase.size()), Verbose::VERBOSITY_DEBUG);
     bool bRedrawError = false;
+    cout << vToErase.size() << " outliers, totally " << vpMapPointEdgeMono.size() << " points." << endl;
     if(vToErase.size() >= (vpMapPointEdgeMono.size()+vpMapPointEdgeStereo.size()) * 0.5)
     {
         Verbose::PrintMess("LM-LBA: ERROR IN THE OPTIMIZATION, MOST OF THE POINTS HAS BECOME OUTLIERS", Verbose::VERBOSITY_NORMAL);
 
-        return;
+        // return;
         bRedrawError = true;
         string folder_name = "test_LBA";
         string name = "_PreLM_LBA";
@@ -2334,8 +2335,8 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
 
     if(!vToErase.empty())
     {
-        map<KeyFrame*, int> mspInitialConnectedKFs;
-        map<KeyFrame*, int> mspInitialObservationKFs;
+        map<KeyFrame*, int> mspInitialConnectedKFs; ///< 相关的关键帧
+        map<KeyFrame*, int> mspInitialObservationKFs; ///< 关键帧中的地图点
         if(bRedrawError)
         {
             for(KeyFrame* pKFi : lLocalKeyFrames)
@@ -2351,8 +2352,8 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
         {
             KeyFrame* pKFi = vToErase[i].first;
             MapPoint* pMPi = vToErase[i].second;
-            pKFi->EraseMapPointMatch(pMPi);
-            pMPi->EraseObservation(pKFi);
+            pKFi->EraseMapPointMatch(pMPi); // 偏差比较大，在关键帧中剔除对该地图点的观测
+            pMPi->EraseObservation(pKFi); // 在地图点中剔除对该关键帧的观测
         }
 
         map<KeyFrame*, int> mspFinalConnectedKFs;
@@ -2458,9 +2459,9 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
     {
         string folder_name = "test_LBA";
         string name = "_PostLM_LBA";
-        //pMap->printReprojectionError(lLocalKeyFrames, pKF, name, folder_name);
+        pMap->printReprojectionError(lLocalKeyFrames, pKF, name, folder_name);
         name = "_PostLM_LBA_Fixed";
-        //pMap->printReprojectionError(lFixedCameras, pKF, name, folder_name);
+        pMap->printReprojectionError(lFixedCameras, pKF, name, folder_name);
     }
 
     // TODO Check this changeindex
@@ -5158,7 +5159,9 @@ void Optimizer::LocalInertialBA(KeyFrame *pKF, bool *pbStopFlag, Map *pMap, bool
 
     // Check inlier observations
     // Mono
-    for(size_t i=0, iend=vpEdgesMono.size(); i<iend;i++)
+    size_t eCnt = vpEdgesMono.size();
+    cout << "LIBA KFs total matched points: " << eCnt << endl;
+    for (size_t i = 0, iend = vpEdgesMono.size(); i < iend; i++)
     {
         EdgeMono* e = vpEdgesMono[i];
         MapPoint* pMP = vpMapPointEdgeMono[i];
@@ -5893,7 +5896,7 @@ void Optimizer::InertialOptimization(vector<KeyFrame*> vpKFs, Eigen::Vector3d &b
     cv::Mat cvbg = Converter::toCvMat(bg);
 
     //Keyframes velocities and biases
-    const int N = vpKFs.size();
+    const size_t N = vpKFs.size();
     for(size_t i=0; i<N; i++)
     {
         KeyFrame* pKFi = vpKFs[i];
